@@ -1990,12 +1990,61 @@
                 }
             });
             
+            // Track if Escape key was pressed to exit fullscreen
+            let escapeKeyPressed = false;
+            
+            // Listen for escape key press
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    escapeKeyPressed = true;
+                    // Reset after a short delay
+                    setTimeout(() => {
+                        escapeKeyPressed = false;
+                    }, 1000);
+                }
+            });
+            
+            // Listen for fullscreenchange event
+            document.addEventListener('fullscreenchange', function() {
+                if (!document.fullscreenElement && !escapeKeyPressed) {
+                    // If fullscreen was exited but NOT by pressing Escape, try to re-enter fullscreen
+                    setTimeout(function() {
+                        document.documentElement.requestFullscreen().catch(err => {
+                            console.log(`Error attempting to re-enable fullscreen: ${err.message}`);
+                        });
+                        fullscreenToggle.innerHTML = '<i class="fas fa-compress"></i>';
+                    }, 500);
+                } else if (document.fullscreenElement) {
+                    fullscreenToggle.innerHTML = '<i class="fas fa-compress"></i>';
+                } else {
+                    fullscreenToggle.innerHTML = '<i class="fas fa-expand"></i>';
+                }
+            });
+            
             // Automatically attempt to go to fullscreen mode on load
             setTimeout(function() {
                 document.documentElement.requestFullscreen().catch(err => {
                     // Silently fail, user may activate fullscreen later
+                    console.log(`Initial fullscreen request failed: ${err.message}`);
+                    
+                    // Try again after a short delay (some browsers need user interaction first)
+                    setTimeout(() => {
+                        document.documentElement.requestFullscreen().catch(err => {
+                            console.log(`Second fullscreen attempt failed: ${err.message}`);
+                        });
+                    }, 3000);
                 });
+                fullscreenToggle.innerHTML = '<i class="fas fa-compress"></i>';
             }, 1000);
+            
+            // Try to re-enter fullscreen mode when window gets focus
+            window.addEventListener('focus', function() {
+                if (!document.fullscreenElement && !escapeKeyPressed) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        // Silently fail
+                    });
+                }
+            });
             
             // Handle barcode input (both scanner and manual)
             barcodeInput.addEventListener('keypress', function(e) {
