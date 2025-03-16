@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:RATE:{MM}{DD}{YYYY}{########}",
+ "creation": "2025-03-14 03:13:25.790363",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_oga0",
+  "amended_from",
+  "rate_use",
+  "exact_rating",
+  "feedback_reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_oga0",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Ratings",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rate_use",
+   "fieldtype": "Rating",
+   "label": "Rate Use"
+  },
+  {
+   "fieldname": "exact_rating",
+   "fieldtype": "Float",
+   "label": "Exact Rating",
+   "description": "Precise numerical rating value (1.0-5.0)",
+   "precision": 1
+  },
+  {
+   "fieldname": "feedback_reason",
+   "fieldtype": "Text",
+   "label": "Feedback Reason",
+   "description": "Reason for ratings less than 5 stars"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-03-14 03:15:47.268453",
+ "modified_by": "Administrator",
+ "module": "Price Checker",
+ "name": "Ratings",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Guest",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "All",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

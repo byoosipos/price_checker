@@ -70,6 +70,31 @@ app_license = "mit"
 # automatically create page for each record of this doctype
 # website_generators = ["Web Page"]
 
+# Expose certain routes to the web without login
+website_route_rules = [
+	{"from_route": "/price_check", "to_route": "price_check"}
+]
+
+# Allow guest access to all price checker web pages
+allow_guest_to_web_pages = ["price_check"]
+
+# Route to bypass authentication
+auth_bypass_routes = ["price_check"]
+
+# Exempt CSRF for price checker API
+csrf_exempt = [
+    "price_checker.api.get_item_by_barcode",
+    "price_checker.api.*"  # Exempt all price checker APIs
+]
+
+# Set the home page to the price checker instead of login page
+home_page = "price_check"
+
+# Public API endpoints that can be accessed without authentication
+public_api_whitelist = [
+    "price_checker.api.get_item_by_barcode"
+]
+
 # Jinja
 # ----------
 
@@ -177,7 +202,16 @@ app_license = "mit"
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "price_checker.event.get_events"
 # }
-#
+
+# Expose API methods to web without login
+allow_guest_access_to_methods = [
+	"price_checker.api.get_item_by_barcode",
+	"price_checker.api.*",  # Allow all API methods
+	"frappe.client.get_value",
+	"frappe.client.get",
+	"frappe.client.get_list"
+]
+
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
@@ -196,7 +230,7 @@ app_license = "mit"
 
 # Request Events
 # ----------------
-# before_request = ["price_checker.utils.before_request"]
+before_request = ["price_checker.utils.before_request"]
 # after_request = ["price_checker.utils.after_request"]
 
 # Job Events

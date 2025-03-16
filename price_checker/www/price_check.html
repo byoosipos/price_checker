@@ -1,0 +1,2736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'none'">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Metro Supermarket Price Checker</title>
+    <script src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+    <script src="/assets/frappe/js/frappe/utils/ajax.js"></script>
+    <script src="/assets/frappe/js/frappe/utils/number_format.js"></script>
+    <script src="/assets/frappe/js/frappe/utils/pretty_date.js"></script>
+    <script src="/assets/frappe/js/frappe/ui/messages.js"></script>
+    <script src="/assets/frappe/js/frappe/utils/datetime.js"></script>
+    <script src="/assets/frappe/js/frappe/class.js"></script>
+    <script src="/assets/frappe/js/frappe/microtemplate.js"></script>
+    <script src="/assets/frappe/js/frappe/format.js"></script>
+    <script src="/assets/frappe/js/frappe/provide.js"></script>
+    <script src="/assets/frappe/js/frappe/assets.js"></script>
+    <script src="/assets/frappe/js/frappe/rest.js"></script>
+    <script src="/assets/frappe/js/frappe/events.js"></script>
+    <script src="/assets/frappe/js/frappe/model/model.js"></script>
+    <script src="/assets/frappe/js/frappe/meta_tag.js"></script>
+    <script src="/assets/frappe/js/lib/bootstrap-4-web/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/assets/frappe/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Metro Supermarket Colors */
+            --primary-color: #363996; /* Metro blue/purple */
+            --primary-color-rgb: 54, 57, 150;
+            --secondary-color: #e52d27; /* Metro red */
+            --secondary-color-rgb: 229, 45, 39;
+            --background-color: #f8f9fa;
+            --text-color: #2d3748;
+            --gray-light: #e2e8f0;
+            --gray-medium: #a0aec0;
+            --success-color: #38a169;
+            --error-color: #e52d27;
+            --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --star-color: #FFD700; /* Gold color for stars */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .fullscreen-container {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #f0f2f5 100%);
+            padding-bottom: 35px; /* Reduced from 60px to 35px */
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4b4dbd 100%);
+            color: white;
+            padding: 0.6rem; /* Reduced padding */
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(var(--primary-color-rgb), 0.25);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            margin-right: 20px;
+            height: 40px;
+            background-color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-container img {
+            height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem; /* Reduced padding */
+            overflow: hidden; /* Changed from overflow-y: auto to prevent scrolling */
+            background-image: 
+                radial-gradient(circle at 20% 35%, rgba(var(--primary-color-rgb), 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(var(--secondary-color-rgb), 0.03) 0%, transparent 50%);
+        }
+        
+        .barcode-scanner-section {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 1rem; /* Reduced margin */
+            text-align: center;
+            background: white;
+            padding: 1rem; /* Reduced padding */
+            border-radius: 20px;
+            box-shadow: var(--box-shadow);
+            transform: translateY(0);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 5;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+        }
+        
+        .barcode-scanner-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .barcode-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .barcode-icon i {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .barcode-icon::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.15) 0%, rgba(var(--primary-color-rgb), 0.05) 100%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+        
+        .instructions {
+            font-size: 18px;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        #barcode-input {
+            width: 100%;
+            max-width: 600px;
+            padding: 1rem;
+            font-size: 22px;
+            text-align: center;
+            border: 2px solid var(--gray-light);
+            border-radius: 15px;
+            background-color: white;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 1px;
+            color: var(--primary-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+        }
+        
+        #barcode-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+        }
+        
+        .scan-line {
+            height: 2px;
+            width: 80%;
+            background: linear-gradient(to right, transparent, var(--secondary-color), transparent);
+            position: absolute;
+            bottom: 30%;
+            left: 10%;
+            opacity: 0;
+            animation: scan 2s ease-in-out infinite;
+        }
+        
+        @keyframes scan {
+            0% {
+                bottom: 20%;
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                bottom: 80%;
+                opacity: 0;
+            }
+        }
+        
+        .results-section {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            margin-bottom: 50px; /* Add margin to ensure content doesn't get cut off by contact banner */
+            position: relative;
+            z-index: 4;
+        }
+        
+        .item-details {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 1.5rem; /* Reduced padding */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            animation: fadeInUp 0.3s ease-out;
+            transform-origin: center bottom;
+            will-change: transform, opacity;
+            max-width: 800px; /* Reduced from 1100px to ensure it fits between ads */
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .item-header {
+            display: flex;
+            margin-bottom: 1rem; /* Reduced from 1.5rem */
+            align-items: stretch;
+            min-height: 200px; /* Reduced from 250px */
+            position: relative;
+            padding-top: 70px; /* Reduced from 90px */
+        }
+        
+        .item-image-container {
+            flex: 0 0 33.333%;
+            position: relative;
+            z-index: 5;
+            padding-right: 1.5rem; /* Reduced from 2rem */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 200px; /* Reduced from 300px */
+        }
+        
+        .item-image {
+            width: 100%; /* Take full width of container */
+            height: 100%; /* Take full height of container */
+            object-fit: contain; /* Maintain aspect ratio */
+            background-color: white;
+            border: 1px solid var(--gray-light);
+            padding: 1rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            max-height: none; /* Remove max-height limitation */
+        }
+        
+        .item-info {
+            flex: 0 0 66.666%; /* Exactly 2/3 of the space */
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            padding-left: 1rem; /* Add some padding on the left */
+        }
+        
+        .item-name {
+            font-size: 48px; /* Reduced from 60px */
+            font-weight: 800;
+            color: var(--primary-color);
+            position: absolute; /* Position absolutely */
+            top: 0; /* Position at the top */
+            left: 0; /* Start from left edge */
+            right: 0; /* Extend to right edge */
+            width: 100%; /* Full width */
+            text-align: center; /* Center text */
+            line-height: 1; /* Slightly tighter line height for larger text */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15); /* Enhanced shadow for larger text */
+            word-wrap: break-word;
+            overflow: hidden; /* Prevent overflow */
+            margin-bottom: 0; /* Remove bottom margin since it's absolutely positioned */
+            z-index: 10; /* Ensure it's above other elements */
+        }
+        
+        .item-code {
+            font-size: 20px;
+            color: var(--gray-medium);
+            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+        }
+        
+        .item-group {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: rgba(var(--secondary-color-rgb), 0.1);
+            border-radius: 8px;
+        }
+        
+        .price-section {
+            text-align: center;
+            margin-top: 1rem;
+            position: relative;
+            padding: 0;
+            width: 100%;
+        }
+        
+        .item-price {
+            font-size: 48px; /* Reduced from 72px */
+            font-weight: 800;
+            color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.15) 0%, rgba(var(--primary-color-rgb), 0.05) 100%);
+            border-radius: 12px;
+            padding: 0.6rem 0.8rem; /* Reduced padding */
+            display: block;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(var(--primary-color-rgb), 0.15);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(var(--primary-color-rgb), 0.2);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateZ(0);
+            box-sizing: border-box;
+            line-height: 1.1;
+            margin-top: 0.8rem; /* Added margin top */
+        }
+        
+        /* Restore shimmer effect */
+        .item-price::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+            z-index: 1;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-150%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(150%) rotate(45deg);
+            }
+        }
+        
+        /* Keep highlight effect */
+        .item-price::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+            border-radius: 18px 18px 0 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        /* Add a currency symbol style */
+        .item-price .currency-symbol {
+            font-size: 0.6em; /* Slightly reduced relative size for better proportion */
+            vertical-align: top;
+            position: relative;
+            top: 0.1em;
+            opacity: 0.9;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .loader-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            display: none;
+            color: white;
+            background: linear-gradient(135deg, var(--error-color) 0%, #e74c3c 100%);
+            padding: 1.5rem 2.5rem;
+            border-radius: 12px;
+            margin: 1.5rem auto;
+            max-width: 600px;
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(var(--secondary-color-rgb), 0.2);
+            animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+        .fullscreen-button {
+            position: fixed;
+            bottom: 40px; /* Reduced from 70px to 40px */
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4b4dbd 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px; /* Reduced from 60px to 50px */
+            height: 50px; /* Reduced from 60px to 50px */
+            font-size: 20px; /* Reduced from 24px to 20px */
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(var(--primary-color-rgb), 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+        
+        .fullscreen-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 25px rgba(var(--primary-color-rgb), 0.4);
+        }
+
+        /* Futuristic elements */
+        .pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(var(--primary-color-rgb), 0.3);
+            z-index: 1;
+            opacity: 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Advertisement Panels */
+        .ads-container {
+            position: fixed;
+            top: 0;
+            height: 100vh;
+            width: 18%; /* Reduced width */
+            z-index: 5;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 0;
+        }
+        
+        .ads-left {
+            left: 0;
+        }
+        
+        .ads-right {
+            right: 0;
+        }
+        
+        .ad-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            margin: 15px;
+            min-height: 320px; /* Changed from fixed height to minimum height */
+            height: auto; /* Allow auto height */
+            position: relative;
+            pointer-events: auto;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .ad-panel:hover {
+            transform: translateY(-5px);
+        }
+        
+        .ad-slides {
+            flex-grow: 1; /* Allow slides container to grow and fill space */
+            position: relative;
+            display: flex;
+        }
+        
+        .ad-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none; /* Make inactive slides non-interactive */
+        }
+        
+        .ad-slide.active {
+            opacity: 1;
+            z-index: 1; /* Ensure active slide is on top */
+            pointer-events: auto; /* Make active slide interactive */
+        }
+        
+        .ad-title {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4b4dbd 100%);
+            color: white;
+            padding: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0; /* Prevent title from shrinking */
+        }
+        
+        .ad-image {
+            height: auto; /* Changed from fixed height to auto */
+            min-height: 220px; /* Added minimum height instead of fixed height */
+            flex-grow: 1; /* Allow image to grow and take available space */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0; /* Remove all margins */
+            border-radius: 6px;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+            position: relative; /* Add position relative for proper sizing */
+            flex: 1; /* Make it take all available space */
+        }
+        
+        .ad-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            text-align: center;
+            margin: 5px 0;
+        }
+        
+        .ad-description {
+            font-size: 14px;
+            text-align: center;
+            padding: 0;
+            line-height: 1.4;
+            color: var(--text-color);
+            margin-top: 0;
+            flex-shrink: 0;
+            display: none; /* Hide the description area completely */
+            min-height: 0; /* Remove minimum height */
+        }
+        
+        .ad-badge {
+            position: absolute;
+            top: 10px; /* Adjusted position to be visible with the image */
+            right: 10px; /* Adjusted position to be visible with the image */
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            transform: rotate(15deg);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            animation: pulse-badge 2s infinite;
+            z-index: 5; /* Ensure badge is above the image */
+        }
+        
+        .shop-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin: 6px auto 0;
+            display: block;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(var(--secondary-color-rgb), 0.3);
+        }
+        
+        .shop-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(var(--secondary-color-rgb), 0.4);
+        }
+        
+        @keyframes pulse-badge {
+            0% {
+                transform: rotate(15deg) scale(1);
+            }
+            50% {
+                transform: rotate(15deg) scale(1.1);
+            }
+            100% {
+                transform: rotate(15deg) scale(1);
+            }
+        }
+        
+        .ads-tag {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            font-style: italic;
+            color: var(--gray-medium);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .ads-container {
+                width: 18%;
+            }
+            
+            .ad-title {
+                font-size: 14px;
+            }
+            
+            .ad-description {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .ads-container {
+                width: 16%; /* Don't hide, just make narrower */
+            }
+            
+            .ad-panel {
+                min-height: 220px; /* Changed from fixed height to minimum height */
+                height: auto; /* Allow auto height */
+            }
+            
+            .ad-image {
+                min-height: 180px; /* Changed from fixed height to minimum height */
+                flex-grow: 1; /* Allow image to grow */
+                margin: 0; /* Remove all margins */
+            }
+            
+            .contact-banner {
+                padding: 0.4rem 0.8rem;
+                font-size: 14px;
+            }
+            
+            .contact-banner-content {
+                gap: 1rem;
+            }
+        }
+        
+        /* Optimize specifically for 1024x768 */
+        @media (width: 1024px) and (height: 768px) {
+            .ads-container {
+                width: 17%; /* Reduced width to make more space for content */
+                padding: 50px 0;
+                z-index: 5;
+            }
+            
+            .ad-panel {
+                min-height: 280px; /* Reduced height */
+                height: auto;
+                margin: 15px 8px; /* Reduced margin */
+            }
+            
+            .ad-image {
+                min-height: 250px; /* Increased height to fill the space */
+                flex-grow: 1;
+                background-size: contain;
+                background-position: center;
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease;
+                margin: 0; /* Remove all margins */
+                flex: 1; /* Make it take all available space */
+            }
+            
+            .main-content {
+                padding: 0.8rem; /* Reduced padding */
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                overflow: hidden;
+            }
+            
+            .barcode-scanner-section {
+                margin-bottom: 0.8rem; /* Reduced margin */
+                max-width: 550px;
+                padding: 0.8rem; /* Reduced padding */
+            }
+            
+            .logo-container {
+                height: 30px; /* Reduced height */
+                padding: 3px 6px;
+            }
+            
+            .header {
+                padding: 0.5rem; /* Reduced padding */
+            }
+            
+            .header h1 {
+                font-size: 24px; /* Reduced font size */
+            }
+            
+            .ad-panel:hover .ad-image {
+                transform: scale(1.02);
+            }
+            
+            .website-url {
+                display: none; /* Hide the website URL completely */
+            }
+            
+            .item-name {
+                font-size: 48px; /* Reduced from 60px */
+                margin-bottom: 0.8rem; /* Slightly reduced margin to save space */
+                line-height: 1.1;
+            }
+            
+            .item-code {
+                font-size: 18px; /* Reduced font size */
+                margin-bottom: 0.8rem; /* Reduced margin */
+            }
+            
+            .item-group {
+                font-size: 28px; /* Reduced font size */
+                margin-bottom: 0.8rem; /* Reduced margin */
+            }
+            
+            .item-price {
+                font-size: 42px; /* Further reduced for this resolution */
+                padding: 0.5rem 0.6rem;
+                margin-top: 0.6rem;
+            }
+            
+            .item-image-container {
+                min-height: 220px; /* Reduced height */
+                padding-right: 1.5rem; /* Reduced padding */
+            }
+            
+            .item-image {
+                height: 100%;
+                width: 100%;
+            }
+            
+            .results-section {
+                width: 66%; /* Set width to fit between ad panels */
+                max-width: 650px; /* Reduced max-width */
+                margin: 0 auto;
+                position: relative;
+                z-index: 20;
+            }
+            
+            .item-details {
+                padding: 1.5rem; /* Reduced padding */
+                margin: 0 auto;
+                position: relative;
+                z-index: 20;
+                background: rgba(255, 255, 255, 0.98);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+            
+            .price-section {
+                margin-top: 1rem; /* Reduced margin */
+                width: 100%; /* Full width */
+                padding: 0; /* Remove padding */
+            }
+            
+            .price-label {
+                font-size: 24px; /* Reduced font size */
+                margin-bottom: 0.5rem; /* Reduced margin */
+            }
+            
+            .item-header {
+                margin-bottom: 1.2rem; /* Reduced margin */
+                min-height: 220px; /* Reduced height */
+                padding-top: 70px; /* Reduced padding-top for smaller screens */
+            }
+            
+            .instructions {
+                font-size: 16px; /* Reduced font size */
+                margin-bottom: 1rem; /* Reduced margin */
+            }
+            
+            #barcode-input {
+                padding: 0.8rem; /* Reduced padding */
+                font-size: 20px; /* Reduced font size */
+            }
+            
+            .barcode-icon {
+                font-size: 40px; /* Reduced font size */
+                margin-bottom: 0.8rem; /* Reduced margin */
+            }
+            
+            .error-message {
+                padding: 1rem 2rem; /* Reduced padding */
+                margin: 1rem auto; /* Reduced margin */
+                font-size: 18px; /* Reduced font size */
+            }
+            
+            .loader {
+                margin: 1rem 0; /* Reduced margin */
+            }
+            
+            .loader-icon {
+                font-size: 40px; /* Reduced font size */
+            }
+            
+            /* Ensure the fullscreen container doesn't allow scrolling */
+            .fullscreen-container {
+                overflow: hidden;
+                height: 100vh;
+                max-height: 768px;
+                padding-bottom: 55px; /* Reduced from 105px to 55px */
+            }
+            
+            .promo-banner {
+                padding: 0.4rem 0.8rem;
+                margin-bottom: 0.8rem;
+                max-width: 100%;
+                margin-left: -0.8rem; /* Match the main-content padding */
+                margin-right: -0.8rem;
+                width: calc(100% + 1.6rem);
+            }
+            
+            .promo-banner-content {
+                font-size: 16px;
+            }
+            
+            .contact-banner {
+                padding: 0.6rem 0.8rem; /* Reduced padding from 1.2rem to 0.6rem */
+                font-size: 16px; /* Reduced font size from 18px to 16px */
+                min-height: calc(35px * 1.5); /* Reduced from 3x to 1.5x */
+            }
+            
+            .fullscreen-button {
+                bottom: 60px; /* Reduced from 120px to 60px */
+            }
+            
+            /* Ensure rating container fits properly */
+            .rating-container {
+                max-width: 550px;
+                padding: 1.2rem;
+            }
+            
+            .rating-stars {
+                gap: 0.4rem;
+            }
+            
+            .star {
+                font-size: 36px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .ads-container {
+                display: none; /* Only hide on very small screens */
+            }
+            
+            .item-header {
+                flex-direction: column;
+                min-height: auto; /* Allow natural height on mobile */
+                padding-top: 60px; /* Adjusted for mobile */
+            }
+            
+            .item-image-container {
+                flex: 0 0 auto;
+                width: 100%;
+                padding-right: 0;
+                margin-bottom: 2rem;
+            }
+            
+            .item-info {
+                flex: 0 0 auto;
+                width: 100%;
+                padding-left: 0;
+            }
+            
+            .item-name {
+                font-size: 28px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                text-align: center;
+            }
+            
+            .item-price {
+                font-size: 36px;
+                padding: 0.4rem 0.5rem;
+                margin-top: 0.5rem;
+            }
+            
+            .promo-banner {
+                padding: 0.3rem 0.6rem;
+                margin-bottom: 0.6rem;
+                max-width: 100%;
+                margin-left: -0.8rem; /* Match the main-content padding */
+                margin-right: -0.8rem;
+                width: calc(100% + 1.6rem);
+            }
+            
+            .promo-banner-content {
+                font-size: 14px;
+            }
+            
+            .contact-banner {
+                padding: 0.5rem 0.6rem; /* Reduced padding from 1rem to 0.5rem */
+                font-size: 14px; /* Reduced font size from 16px to 14px */
+                min-height: calc(30px * 1.5); /* Reduced from 3x to 1.5x */
+            }
+            
+            .contact-banner-content {
+                gap: 1rem; /* Reduced gap from 1.5rem to 1rem */
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .contact-item i {
+                font-size: 16px; /* Reduced from 20px to 16px */
+            }
+            
+            .contact-label {
+                font-size: 15px; /* Reduced from 18px to 15px */
+            }
+            
+            .fullscreen-button {
+                bottom: 100px; /* Reduced from 200px to 100px */
+            }
+            
+            .fullscreen-container {
+                padding-bottom: 120px; /* Reduced from 240px to 120px */
+            }
+        }
+        
+        .website-url {
+            display: none; /* Hide the website URL completely */
+        }
+
+        /* Enhance item image with subtle border glow on hover */
+        .item-image:hover {
+            box-shadow: 0 15px 35px rgba(var(--primary-color-rgb), 0.2);
+            border-color: rgba(var(--primary-color-rgb), 0.3);
+        }
+        
+        /* Banner with running advertisement */
+        .promo-banner {
+            width: 100%;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #ff4742 100%);
+            color: white;
+            padding: 0.6rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0; /* Removed border radius for full-width appearance */
+            box-shadow: 0 5px 15px rgba(var(--secondary-color-rgb), 0.2);
+            overflow: hidden;
+            position: relative;
+            max-width: 100%; /* Changed from 800px to 100% for full width */
+            text-align: center;
+            margin-left: -1rem; /* Extend beyond container padding */
+            margin-right: -1rem; /* Extend beyond container padding */
+            width: calc(100% + 2rem); /* Compensate for the negative margins */
+        }
+        
+        .promo-banner-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scrollText 60s linear infinite; /* Increased from 40s to 60s for even slower scrolling */
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-size: 18px;
+            padding-right: 100px; /* Add padding to create space between end and beginning for smoother loop */
+        }
+        
+        .promo-banner-content strong {
+            color: #fff;
+            font-weight: 800;
+        }
+        
+        @keyframes scrollText {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* Contact Information Banner - Reduced by half */
+        .contact-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4b4dbd 100%);
+            color: white;
+            padding: 0.35rem 1rem; /* Reduced padding from 0.75rem to 0.35rem */
+            text-align: center;
+            font-size: 14px; /* Reduced font size from 16px to 14px */
+            font-weight: 500;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(30px * 0.75); /* Reduced from 40px * 0.75 to 30px * 0.75 */
+        }
+        
+        .contact-banner-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem; /* Reduced from 1.5rem to 1rem */
+            width: 100%;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem; /* Reduced from 0.5rem to 0.4rem */
+            padding: 0.1rem 0; /* Reduced padding from 0.15rem to 0.1rem */
+        }
+        
+        .contact-item i {
+            animation: pulse-icon 2s infinite;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px; /* Reduced from 16px to 14px */
+        }
+        
+        .contact-item a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 600;
+            padding: 0.2rem 0; /* Reduced padding from 0.3rem to 0.2rem */
+        }
+        
+        .contact-item a:hover {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: underline;
+        }
+        
+        .contact-label {
+            font-weight: 600;
+            margin-right: 0.2rem; /* Reduced from 0.3rem to 0.2rem */
+            font-size: 14px; /* Reduced from 16px to 14px */
+        }
+        
+        .phone-numbers {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 0.75rem; /* Reduced gap from 1rem to 0.75rem */
+        }
+        
+        @keyframes pulse-icon {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive adjustments for contact banner */
+        @media (max-width: 992px) {
+            .contact-banner {
+                padding: 0.65rem 0.8rem; /* Reduced from 1.3rem to 0.65rem */
+                font-size: 16px; /* Reduced from 18px to 16px */
+                min-height: calc(38px * 1.5); /* Reduced from 3x to 1.5x */
+            }
+            
+            .contact-banner-content {
+                gap: 1.5rem; /* Reduced from 2rem to 1.5rem */
+            }
+            
+            .contact-item i {
+                font-size: 18px; /* Reduced from 22px to 18px */
+            }
+            
+            .contact-label {
+                font-size: 17px; /* Reduced from 20px to 17px */
+            }
+        }
+
+        /* Rating feature styles */
+        .rating-container {
+            display: block; /* Changed from 'none' to 'block' to show by default */
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: var(--box-shadow);
+            margin: 1rem auto;
+            max-width: 600px;
+            text-align: center;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        .rating-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: transparent;
+            background: linear-gradient(45deg, var(--primary-color), #4b4dbd, var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(var(--primary-color-rgb), 0.2);
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .rating-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+        
+        .rating-description {
+            font-size: 16px;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .rating-stars {
+            display: flex;
+            justify-content: center;
+            gap: 1rem; /* Increased gap between stars */
+            margin: 1.5rem 0;
+            position: relative;
+            z-index: 1;
+            padding: 25px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Star styles with Unicode stars */
+        .star {
+            font-size: 60px; /* Increased from 40px */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            opacity: 1;
+            user-select: none;
+            display: inline-block;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+            color: #e2e8f0; /* Slightly darker default color */
+            line-height: 1;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+        
+        .star:hover, .star.active {
+            transform: scale(1.3); /* Increased scale effect */
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+        }
+        
+        /* Colorful stars using Metro theme colors */
+        .star[data-value="1"] {
+            color: var(--secondary-color); /* Metro red */
+            text-shadow: 0 0 10px rgba(var(--secondary-color-rgb), 0.5);
+        }
+        .star[data-value="2"] {
+            color: #ff6b6b; /* Lighter red */
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+        .star[data-value="3"] {
+            color: #4b4dbd; /* Metro purple */
+            text-shadow: 0 0 10px rgba(75, 77, 189, 0.5);
+        }
+        .star[data-value="4"] {
+            color: #3a3b8c; /* Darker Metro blue */
+            text-shadow: 0 0 10px rgba(58, 59, 140, 0.5);
+        }
+        .star[data-value="5"] {
+            color: var(--primary-color); /* Metro blue/purple */
+            text-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.5);
+        }
+        
+        /* Enhanced hover effects */
+        .star:hover::before, .star:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.2); /* Increased scale for tooltip */
+        }
+        
+        .star::before {
+            font-size: 16px; /* Increased tooltip font size */
+            padding: 8px 12px; /* Increased padding */
+            background: rgba(0, 0, 0, 0.8); /* Darker background */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Update media queries for responsiveness */
+        @media (width: 1024px) and (height: 768px) {
+            .star {
+                font-size: 50px; /* Slightly reduced for this resolution */
+            }
+            
+            .rating-stars {
+                gap: 0.6rem; /* Increased gap */
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .star {
+                font-size: 45px; /* Adjusted for mobile */
+            }
+            
+            .rating-stars {
+                gap: 0.4rem;
+            }
+        }
+        
+        .feedback-reason {
+            margin-top: 1rem;
+            display: none;
+            padding: 1.5rem;
+            background-color: rgba(var(--primary-color-rgb), 0.05);
+            border-radius: 12px;
+            border: 2px solid rgba(var(--primary-color-rgb), 0.3);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .feedback-reason label {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 16px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feedback-reason select,
+        .feedback-reason textarea {
+            border: 1px solid rgba(var(--primary-color-rgb), 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .feedback-reason select:focus,
+        .feedback-reason textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+        }
+        
+        #submit-feedback {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        #submit-feedback:hover {
+            background-color: #2a2c7a; /* Darker shade of primary color */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(var(--primary-color-rgb), 0.3);
+        }
+        
+        .rating-message {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--success-color);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Additional styles for the feedback reason dropdown */
+        #reason-select {
+            font-size: 18px; /* Increased from 16px */
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: white;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.3);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            color: var(--primary-color); /* Set text color to primary color */
+            font-weight: 500; /* Make text slightly bolder */
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23363996' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        #reason-select option {
+            font-size: 16px;
+            padding: 12px;
+            background-color: white;
+            color: var(--text-color); /* Dark text color for better readability */
+            font-weight: 500;
+        }
+
+        #reason-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+            background-color: white;
+        }
+
+        #reason-select:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(var(--primary-color-rgb), 0.02);
+        }
+
+        #reason-select option:checked {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4b4dbd 100%);
+            color: white;
+        }
+
+        /* Style for the placeholder option */
+        #reason-select option[value=""] {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Enhanced styles for the select when it needs attention */
+        .needs-attention {
+            animation: highlightDropdown 1s ease infinite;
+            border-color: var(--secondary-color) !important;
+            background-color: rgba(var(--secondary-color-rgb), 0.05) !important;
+        }
+
+        /* Ensure dropdown options are visible on all browsers */
+        @-moz-document url-prefix() {
+            #reason-select {
+                color: var(--primary-color);
+                background-color: white;
+            }
+            
+            #reason-select option {
+                background-color: white;
+                color: var(--text-color);
+                padding: 12px;
+            }
+        }
+
+        /* Webkit browsers specific styles */
+        #reason-select::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        #reason-select::-webkit-scrollbar-track {
+            background: rgba(var(--primary-color-rgb), 0.05);
+            border-radius: 8px;
+        }
+
+        #reason-select::-webkit-scrollbar-thumb {
+            background: rgba(var(--primary-color-rgb), 0.3);
+            border-radius: 8px;
+            border: 3px solid white;
+        }
+
+        /* Dark mode support for select options */
+        @media (prefers-color-scheme: dark) {
+            #reason-select option {
+                background-color: white;
+                color: var(--text-color);
+            }
+        }
+
+        #other-reason-container {
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+        }
+
+        #other-reason {
+            font-size: 16px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: white;
+            border: 1px solid rgba(var(--primary-color-rgb), 0.3);
+            transition: all 0.3s ease;
+        }
+
+        #other-reason:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        /* Animation for the dropdown */
+        @keyframes highlightDropdown {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* Special style for when dropdown needs attention */
+        .needs-attention {
+            animation: highlightDropdown 1s ease infinite;
+            border-color: var(--secondary-color) !important;
+        }
+        
+        /* Special styling for rating container when below item details */
+        .rating-container.below-item {
+            margin-top: 1rem;
+            margin-bottom: 50px; /* Add margin to ensure it's not hidden by contact banner */
+            border-top: 4px solid var(--primary-color);
+            animation: slideInFromTop 0.5s ease-out;
+            max-width: 800px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        @keyframes slideInFromTop {
+            0% {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Heart-beat animation for rating container */
+        .rating-container {
+            animation: heartbeat 1.5s ease-in-out infinite;
+            transform-origin: center center;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.02); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.02); }
+            70% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Remove heartbeat animation when below item details */
+        .rating-container.below-item {
+            animation: slideInFromTop 0.5s ease-out;
+        }
+        
+        .rating-container.below-item::before {
+            animation: gradient-rotate 4s linear infinite;
+        }
+        
+        @keyframes particle-move {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Individual star animations */
+        .star[data-value="1"] {
+            animation: pulse-star 2s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+        
+        .star[data-value="2"] {
+            animation: pulse-star 2s ease-in-out infinite;
+            animation-delay: 0.4s;
+        }
+        
+        .star[data-value="3"] {
+            animation: pulse-star 2s ease-in-out infinite;
+            animation-delay: 0.8s;
+        }
+        
+        .star[data-value="4"] {
+            animation: pulse-star 2s ease-in-out infinite;
+            animation-delay: 1.2s;
+        }
+        
+        .star[data-value="5"] {
+            animation: pulse-star 2s ease-in-out infinite;
+            animation-delay: 1.6s;
+        }
+        
+        @keyframes pulse-star {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Remove star animations when star is active or being hovered */
+        .star:hover, .star.active {
+            animation: none;
+        }
+        
+        /* Gradient border for rating container */
+        .rating-container {
+            position: relative;
+            border: none;
+            background: white;
+            z-index: 1;
+            animation: heartbeat 2s infinite ease-in-out;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .rating-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #FF5252, #FF9800, #FFC107, 
+                #8BC34A, #4CAF50, #8BC34A, 
+                #FFC107, #FF9800, #FF5252);
+            border-radius: 22px; /* Slightly larger than the container */
+            z-index: -1;
+            animation: gradient-rotate 4s linear infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradient-rotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Enhanced heart animation */
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.03); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+            28% { transform: scale(1); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+            42% { transform: scale(1.03); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+            70% { transform: scale(1); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="fullscreen-container">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="logometro.png" alt="Metro Supermarket Logo">
+                </div>
+                <h1>Price Checker</h1>
+            </div>
+        </div>
+        
+        <!-- Left Advertisement Panels -->
+        <div class="ads-container ads-left">
+            <div class="ad-panel">
+                <div class="ad-slides">
+                    <div class="ad-slide active">
+                        <div class="ad-title">Thank You For Shopping With Metro!</div>
+                        <div class="ad-image" style="background-image: url('images/happy-male-model-african-american-man-holds-fresh-produce.jpg');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Customer Satisfaction Guaranteed</div>
+                        <div class="ad-image" style="background-image: url('images/mix-raced-couple-reading-text-food-package.jpg');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Metro Values Your Patronage</div>
+                        <div class="ad-image" style="background-image: url('images/side-view-young-man-shopping-cart.png');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ad-panel">
+                <div class="ad-slides">
+                    <div class="ad-slide active">
+                        <div class="ad-title">Quality Products Guaranteed</div>
+                        <div class="ad-image" style="background-image: url('images/freepik__background__82464.png');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                            <div class="ad-badge">100%</div>
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Freshness You Can Trust</div>
+                        <div class="ad-image" style="background-image: url('images/freepik__background__84594.png');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                            <div class="ad-badge">FRESH</div>
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Premium Selection</div>
+                        <div class="ad-image" style="background-image: url('images/freepik__background__277.png');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                            <div class="ad-badge">TOP</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right side advertisements -->
+        <div class="ads-container ads-right">
+            <div class="ad-panel">
+                <div class="ad-slides">
+                    <div class="ad-slide active">
+                        <div class="ad-title">Shop Online Anytime, Anywhere!</div>
+                        <div class="ad-image" style="background-image: url('images/woman-posing-jumping-while-holding-shopping-bags.jpg');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Metro Online Store</div>
+                        <div class="ad-image" style="background-image: url('images/freepik__upload__69775.png');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Metro Delivers To Your Door</div>
+                        <div class="ad-image" style="background-image: url('images/freepik__upload__17161.png');"></div>
+                        <div class="ad-description">
+                            <!-- Description and website URL removed -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ad-panel">
+                <div class="ad-slides">
+                    <div class="ad-slide active">
+                        <div class="ad-title">Weekly Special Offers!</div>
+                        <div class="ad-image" style="background-image: url('images/shopping-cart-with-gifts-arrangement-golden-glitter.jpg');"></div>
+                        <div class="ad-description">
+                            <!-- Description removed as requested -->
+                            <div class="ad-badge">SAVE!</div>
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Limited Time Deals</div>
+                        <div class="ad-image" style="background-image: url('images/shopping-cart-with-gifts-arrangement-golden-glitter (1).jpg');"></div>
+                        <div class="ad-description">
+                            <!-- Description removed as requested -->
+                            <div class="ad-badge">NEW!</div>
+                        </div>
+                    </div>
+                    <div class="ad-slide">
+                        <div class="ad-title">Metro Discount Days</div>
+                        <div class="ad-image" style="background-image: url('images/black-gifts-golden-shopping-cart.jpg');"></div>
+                        <div class="ad-description">
+                            <!-- Description removed as requested -->
+                            <div class="ad-badge">HOT!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="promo-banner">
+                <div class="promo-banner-content">
+                    🛒 Visit <strong>shop.metrogroupng.com</strong> to experience the future of shopping online! • Same-day delivery on all orders • Freshest products guaranteed • Exclusive online discounts • No minimum order • Shop from anywhere, anytime • Metro brings the supermarket to your doorstep! 🚚
+                </div>
+            </div>
+            
+            <div class="barcode-scanner-section">
+                <input type="text" id="barcode-input" placeholder="Scan barcode" autofocus>
+                <div class="scan-line"></div>
+            </div>
+            
+            <div class="error-message" id="error-message"></div>
+            
+            <div class="loader" id="loader">
+                <div class="loader-icon">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <p>Searching for item...</p>
+            </div>
+            
+            <!-- Rating Container - Moved back to original position -->
+            <div class="rating-container" id="rating-container">
+                <div class="rating-title">Rate Our Service</div>
+                <div class="rating-description">Your feedback helps us serve you better at Metro Supermarket.</div>
+                <div class="rating-stars">
+                    <span class="star" data-value="1" data-tooltip="Poor">★</span>
+                    <span class="star" data-value="2" data-tooltip="Fair">★</span>
+                    <span class="star" data-value="3" data-tooltip="Good">★</span>
+                    <span class="star" data-value="4" data-tooltip="Very Good">★</span>
+                    <span class="star" data-value="5" data-tooltip="Excellent">★</span>
+                </div>
+                <div class="feedback-reason" id="feedback-reason" style="display: none; margin-top: 1rem;">
+                    <label for="reason-select" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Please tell us why:</label>
+                    <select id="reason-select" class="form-control">
+                        <option value="">-- Select a reason --</option>
+                        <option value="Product Quality">Product Quality Issues</option>
+                        <option value="Price Concerns">Price Concerns</option>
+                        <option value="Customer Service">Customer Service Experience</option>
+                        <option value="Store Cleanliness">Store Cleanliness</option>
+                        <option value="Product Availability">Product Availability</option>
+                        <option value="Checkout Experience">Checkout Experience</option>
+                        <option value="Store Layout">Store Layout/Navigation</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div id="other-reason-container" style="display: none; margin-top: 0.5rem;">
+                        <textarea id="other-reason" class="form-control" placeholder="Please specify your reason" rows="2"></textarea>
+                    </div>
+                    <button id="submit-feedback" class="btn btn-primary" style="margin-top: 1rem; background-color: var(--primary-color); border-color: var(--primary-color);">Submit Feedback</button>
+                </div>
+                <div class="rating-message" id="rating-message">Thank you for your feedback!</div>
+            </div>
+            
+            <div class="results-section">
+                <div class="item-details" id="item-details">
+                    <div class="item-header">
+                        <div class="item-image-container">
+                            <img src="" id="item-image" class="item-image" alt="Item Image">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name" id="item-name"></div>
+                            <div class="item-code" id="item-code"></div>
+                            <div class="item-group" id="item-group"></div>
+                            <div class="price-section">
+                                <div class="item-price" id="item-price"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="fullscreen-button" id="fullscreen-toggle">
+        <i class="fas fa-expand"></i>
+    </button>
+    
+    <!-- Contact Information Banner -->
+    <div class="contact-banner">
+        <div class="contact-banner-content">
+            <div class="contact-item">
+                <i class="fas fa-phone-alt"></i>
+                <span><span class="contact-label">Phone:</span>
+                    <span class="phone-numbers">
+                        <a href="tel:+2349124024236">+234 912 402 4236</a>,
+                        <a href="tel:+2348149118857">+234 814 911 8857</a>,
+                        <a href="tel:+2348154254367">+234 815 425 4367</a>
+                    </span>
+                </span>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <span><span class="contact-label">Email:</span> <a href="mailto:info@metrosupermarket.com.ng">info@metrosupermarket.com.ng</a></span>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-info-circle"></i>
+                <span>For any enquiries</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const barcodeInput = document.getElementById('barcode-input');
+            const itemDetails = document.getElementById('item-details');
+            const loader = document.getElementById('loader');
+            const errorMessage = document.getElementById('error-message');
+            const fullscreenToggle = document.getElementById('fullscreen-toggle');
+            const ratingContainer = document.getElementById('rating-container');
+            
+            // Ensure rating container is visible on page load
+            ratingContainer.style.display = 'block';
+            
+            // Set up a timer to show and reset the rating form if no activity for 60 seconds
+            let inactivityTimer;
+            
+            function resetInactivityTimer() {
+                // Clear existing timer
+                if (inactivityTimer) {
+                    clearTimeout(inactivityTimer);
+                }
+                
+                // Set new timer
+                inactivityTimer = setTimeout(function() {
+                    // If item details are showing, hide them
+                    if (itemDetails.style.display === 'block') {
+                        itemDetails.style.display = 'none';
+                    }
+                    
+                    // Move the rating container back to its original position if it's below an item
+                    const ratingContainer = document.getElementById('rating-container');
+                    if (ratingContainer.classList.contains('below-item')) {
+                        const resultsSection = document.querySelector('.results-section');
+                        
+                        // Insert the rating container back to its original position
+                        document.querySelector('.main-content').insertBefore(ratingContainer, resultsSection);
+                        
+                        // Remove the special styling
+                        ratingContainer.classList.remove('below-item');
+                    }
+                    
+                    // Show and reset rating container
+                    ratingContainer.style.display = 'block';
+                    resetRating();
+                    ratingContainer.scrollIntoView({ behavior: 'smooth' });
+                }, 60000); // 60 seconds
+            }
+            
+            // Start the inactivity timer on page load
+            resetInactivityTimer();
+            
+            // Reset the timer on user interaction
+            document.addEventListener('click', resetInactivityTimer);
+            document.addEventListener('keypress', resetInactivityTimer);
+            barcodeInput.addEventListener('input', resetInactivityTimer);
+            
+            // Cache for recently scanned items
+            const itemCache = new Map();
+            const CACHE_SIZE = 20; // Store last 20 items
+            
+            // Ad slideshow functionality
+            function setupAdSlideshow() {
+                const adPanels = document.querySelectorAll('.ad-panel');
+                
+                adPanels.forEach(panel => {
+                    const slides = panel.querySelectorAll('.ad-slide');
+                    let currentSlide = 0;
+                    
+                    // Only set up slideshow if there are multiple slides
+                    if (slides.length > 1) {
+                        setInterval(() => {
+                            slides[currentSlide].classList.remove('active');
+                            currentSlide = (currentSlide + 1) % slides.length;
+                            slides[currentSlide].classList.add('active');
+                        }, 5000); // Change slide every 5 seconds
+                    }
+                });
+            }
+            
+            // Initialize ad slideshows
+            setupAdSlideshow();
+            
+            // Keep focus on input regardless of other clicks
+            function focusOnBarcodeInput() {
+                setTimeout(function() {
+                    barcodeInput.focus();
+                }, 50); // Reduced from 100ms for faster response
+            }
+            
+            // Add global click event listener to focus on barcode input
+            document.addEventListener('click', focusOnBarcodeInput);
+            
+            // Add additional focus management to ensure cursor always stays in barcode input
+            document.addEventListener('mouseup', focusOnBarcodeInput);
+            document.addEventListener('touchend', focusOnBarcodeInput);
+            
+            // Refocus on barcode input when window gets focus
+            window.addEventListener('focus', focusOnBarcodeInput);
+            
+            // Set an interval to periodically check and refocus if needed
+            setInterval(function() {
+                // Only refocus if the active element is not the barcode input
+                const activeElement = document.activeElement;
+                if (activeElement !== barcodeInput && 
+                    activeElement.tagName !== 'INPUT' && 
+                    activeElement.tagName !== 'TEXTAREA' &&
+                    activeElement.tagName !== 'SELECT') {
+                    barcodeInput.focus();
+                }
+            }, 1000); // Check every second
+            
+            // Auto-focus the input field
+            barcodeInput.focus();
+            
+            // Toggle fullscreen mode
+            fullscreenToggle.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                    fullscreenToggle.innerHTML = '<i class="fas fa-compress"></i>';
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                        fullscreenToggle.innerHTML = '<i class="fas fa-expand"></i>';
+                    }
+                }
+            });
+            
+            // Automatically attempt to go to fullscreen mode on load
+            setTimeout(function() {
+                document.documentElement.requestFullscreen().catch(err => {
+                    // Silently fail, user may activate fullscreen later
+                });
+            }, 1000);
+            
+            // Handle barcode input (both scanner and manual)
+            barcodeInput.addEventListener('keypress', function(e) {
+                // Most barcode scanners will send Enter key after scanning
+                if (e.key === 'Enter') {
+                    const barcode = barcodeInput.value.trim();
+                    if (barcode) {
+                        searchItem(barcode);
+                    } else {
+                        showError('Please scan a barcode');
+                    }
+                }
+            });
+            
+            // Automatically detect barcode scanner input
+            let barcodeBuffer = '';
+            let lastInputTime = 0;
+            const SCANNER_INPUT_THRESHOLD = 50; // Reduced from 100ms for faster detection
+            
+            barcodeInput.addEventListener('input', function(e) {
+                const currentTime = new Date().getTime();
+                
+                if (currentTime - lastInputTime < SCANNER_INPUT_THRESHOLD) {
+                    // Input is coming in rapid succession - likely a scanner
+                    barcodeBuffer = barcodeInput.value.trim();
+                } else if (barcodeBuffer && currentTime - lastInputTime > 300) { // Reduced from 500ms
+                    // There was a pause after rapid input - scanner finished
+                    const barcode = barcodeBuffer;
+                    if (barcode) {
+                        // Clear the input field before searching to prevent issues with consecutive scans
+                        barcodeInput.value = '';
+                        searchItem(barcode);
+                    }
+                    barcodeBuffer = '';
+                }
+                
+                lastInputTime = currentTime;
+            });
+            
+            // Function to search for an item by barcode
+            function searchItem(barcode) {
+                // Reset inactivity timer when searching
+                resetInactivityTimer();
+                
+                // Reset barcode buffer to ensure clean state for next scan
+                barcodeBuffer = '';
+                
+                // Clear any existing view timer when searching for a new item
+                if (window.itemViewTimer) {
+                    clearTimeout(window.itemViewTimer);
+                    window.itemViewTimer = null;
+                }
+                
+                // Make sure rating container is in its original position
+                const ratingContainer = document.getElementById('rating-container');
+                const resultsSection = document.querySelector('.results-section');
+                
+                // If it has the below-item class, it's currently after the results section
+                if (ratingContainer.classList.contains('below-item')) {
+                    // Move it back to its original position (before results section)
+                    document.querySelector('.main-content').insertBefore(ratingContainer, resultsSection);
+                    ratingContainer.classList.remove('below-item');
+                }
+                
+                // Hide rating container when searching for an item
+                ratingContainer.style.display = 'none';
+                
+                // Check cache first for instant response
+                if (itemCache.has(barcode)) {
+                    console.log("Cache hit for barcode:", barcode);
+                    const cachedItem = itemCache.get(barcode);
+                    
+                    // Move this item to the end of the cache to mark it as most recently used
+                    itemCache.delete(barcode);
+                    itemCache.set(barcode, cachedItem);
+                    
+                    displayItemDetails(cachedItem);
+                    barcodeInput.value = '';
+                    barcodeInput.focus();
+                    return;
+                }
+                
+                // Hide previous results and errors, show loader
+                itemDetails.style.display = 'none';
+                errorMessage.style.display = 'none';
+                loader.style.display = 'block';
+                
+                // Use fetch API with our custom endpoint
+                fetch('/api/method/price_checker.api.get_item_by_barcode?barcode=' + encodeURIComponent(barcode), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache' // Ensure fresh data
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loader.style.display = 'none';
+                    
+                    // Debug: Log the complete response to console
+                    console.log("API Response:", data);
+                    
+                    if (data.message && typeof data.message === 'object' && !data.message.error) {
+                        // Cache the result for future scans
+                        addToCache(barcode, data.message);
+                        displayItemDetails(data.message);
+                        // Clear the input for the next scan
+                        barcodeInput.value = '';
+                        barcodeInput.focus();
+                    } else if (data && typeof data === 'object' && !data.error) {
+                        // Handle when data is returned directly without message wrapper
+                        addToCache(barcode, data);
+                        displayItemDetails(data);
+                        barcodeInput.value = '';
+                        barcodeInput.focus();
+                    } else {
+                        const errorMsg = (data && data.error) ? data.error : 
+                                       (data.message && data.message.error) ? data.message.error : 
+                                       'Item not found for barcode: ' + barcode;
+                        showError(errorMsg);
+                        // Ensure input is cleared and focused even on error
+                        barcodeInput.value = '';
+                        barcodeInput.focus();
+                    }
+                })
+                .catch(error => {
+                    loader.style.display = 'none';
+                    console.error("API Error:", error);
+                    showError('Item not found for barcode: ' + barcode);
+                    // Ensure input is cleared and focused even on error
+                    barcodeInput.value = '';
+                    barcodeInput.focus();
+                });
+            }
+            
+            // Add item to cache with LRU (Least Recently Used) strategy
+            function addToCache(barcode, itemData) {
+                console.log("Adding to cache, barcode:", barcode, "data:", itemData);
+                
+                // Make sure we have valid data to cache
+                if (!barcode || !itemData || typeof itemData !== 'object') {
+                    console.error("Invalid data for caching", barcode, itemData);
+                    return;
+                }
+                
+                // If already in cache, remove it first (to update position)
+                if (itemCache.has(barcode)) {
+                    itemCache.delete(barcode);
+                }
+                
+                // Remove oldest item if cache is full
+                if (itemCache.size >= CACHE_SIZE) {
+                    const oldestKey = itemCache.keys().next().value;
+                    itemCache.delete(oldestKey);
+                }
+                
+                // Create a deep copy of the item data to prevent reference issues
+                const itemCopy = JSON.parse(JSON.stringify(itemData));
+                
+                // Add new item to cache
+                itemCache.set(barcode, itemCopy);
+                
+                // Log cache contents for debugging
+                console.log("Cache now contains", itemCache.size, "items");
+            }
+            
+            // Function to display item details
+            function displayItemDetails(item) {
+                console.log("Displaying item details:", item);
+                
+                // Clear any existing view timers
+                if (window.itemViewTimer) {
+                    clearTimeout(window.itemViewTimer);
+                }
+                
+                // Set a unique session ID for this display
+                window.currentDisplaySession = Date.now();
+                const thisSession = window.currentDisplaySession;
+                
+                // Check for correct property names in the response
+                // Different property names might be used in the API response
+                const itemName = item.item_name || item.name || 'Unknown Item';
+                const itemCode = item.item_code || item.code || '';
+                const itemGroup = item.item_group || item.group || '';
+                let itemImage = item.image || '';
+                const itemPrice = item.price || item.rate || 0;
+                const currency = item.currency || 'NGN';
+                
+                // Handle relative image paths
+                if (itemImage && !itemImage.startsWith('http') && !itemImage.startsWith('/')) {
+                    itemImage = '/' + itemImage;
+                }
+                
+                // Update DOM with item details
+                document.getElementById('item-name').textContent = itemName;
+                document.getElementById('item-code').textContent = 'Item Code: ' + itemCode;
+                
+                // Only show item group if it exists
+                const itemGroupElement = document.getElementById('item-group');
+                if (itemGroup) {
+                    itemGroupElement.textContent = itemGroup;
+                    itemGroupElement.style.display = 'inline-block';
+                } else {
+                    itemGroupElement.style.display = 'none';
+                }
+                
+                // Format price with large font and styled currency symbol
+                const formattedPrice = formatCurrency(itemPrice, currency);
+                document.getElementById('item-price').innerHTML = formattedPrice;
+                
+                // Set image or placeholder
+                const imageElement = document.getElementById('item-image');
+                if (itemImage) {
+                    imageElement.src = itemImage;
+                    imageElement.alt = itemName;
+                } else {
+                    imageElement.src = '/assets/frappe/images/no-image.png';
+                    imageElement.alt = 'No image available';
+                }
+                
+                // Show the details container with animation
+                itemDetails.style.display = 'block';
+                
+                // Play a success sound
+                playBeepSound();
+                
+                // Move the rating container below the item details immediately
+                const resultsSection = document.querySelector('.results-section');
+                const ratingContainer = document.getElementById('rating-container');
+                
+                // Position the rating container directly after the item details
+                document.querySelector('.main-content').insertBefore(ratingContainer, resultsSection.nextSibling);
+                
+                // Apply special styling for the rating container when below an item
+                ratingContainer.classList.add('below-item');
+                
+                // Reset and show rating container immediately
+                resetRating();
+                ratingContainer.style.display = 'block';
+                
+                // Ensure barcode input is cleared and focused
+                barcodeInput.value = '';
+                barcodeInput.focus();
+                
+                // Set a timer to hide both item details and rating after 120 seconds (2 minutes) if no interaction
+                window.itemViewTimer = setTimeout(function() {
+                    // Only proceed if this is still the current session
+                    if (thisSession === window.currentDisplaySession) {
+                        // Fade out both containers
+                        itemDetails.style.transition = 'opacity 0.5s ease-out';
+                        ratingContainer.style.transition = 'opacity 0.5s ease-out';
+                        itemDetails.style.opacity = '0';
+                        ratingContainer.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            // Hide both containers
+                            itemDetails.style.display = 'none';
+                            itemDetails.style.opacity = '1';
+                            itemDetails.style.transition = '';
+                            
+                            // Move rating container back to original position and reset it
+                            document.querySelector('.main-content').insertBefore(ratingContainer, resultsSection);
+                            ratingContainer.classList.remove('below-item');
+                            ratingContainer.style.opacity = '1';
+                            ratingContainer.style.transition = '';
+                            ratingContainer.style.display = 'block';
+                            
+                            // Reset rating form
+                            resetRating();
+                            
+                            // Focus on the rating container for better accessibility
+                            ratingContainer.scrollIntoView({ behavior: 'smooth' });
+                            
+                            // Re-enable barcode input focus
+                            document.addEventListener('click', focusOnBarcodeInput);
+                            barcodeInput.focus();
+                        }, 500); // Wait for fade out to complete
+                    }
+                }, 120000); // 120 seconds = 2 minutes
+            }
+            
+            // Currency formatter function since we're not using frappe.format_currency
+            function formatCurrency(value, currency) {
+                if (isNaN(value)) value = 0;
+                
+                // Format with Intl.NumberFormat but without currency symbol
+                const formatter = new Intl.NumberFormat('en-US', {
+                    style: 'decimal',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                
+                // Get formatted number
+                const formattedNumber = formatter.format(value);
+                
+                // Add currency symbol with special styling
+                let currencySymbol = '₦'; // Default to Naira symbol
+                if (currency === 'USD') currencySymbol = '$';
+                else if (currency === 'EUR') currencySymbol = '€';
+                else if (currency === 'GBP') currencySymbol = '£';
+                
+                // Return with styled currency symbol
+                return `<span class="currency-symbol">${currencySymbol}</span>${formattedNumber}`;
+            }
+            
+            // Function to show error message
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                
+                // Get references to elements
+                const ratingContainer = document.getElementById('rating-container');
+                const resultsSection = document.querySelector('.results-section');
+                
+                // Make sure rating container is in its original position
+                if (ratingContainer.classList.contains('below-item')) {
+                    // Move it back to its original position
+                    document.querySelector('.main-content').insertBefore(ratingContainer, resultsSection);
+                    ratingContainer.classList.remove('below-item');
+                }
+                
+                // Auto-clear error after 3 seconds (reduced from 5 seconds)
+                setTimeout(function() {
+                    errorMessage.style.display = 'none';
+                    // Show rating container again after error is cleared
+                    ratingContainer.style.display = 'block';
+                    
+                    // Ensure barcode input is focused again after error disappears
+                    barcodeInput.focus();
+                }, 3000);
+                
+                // Clear the input and refocus for next scan
+                barcodeInput.value = '';
+                barcodeInput.focus();
+            }
+            
+            // Play a beep sound when item is found
+            function playBeepSound() {
+                try {
+                    const beep = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" + 
+                                        "dvT18AAAAA//////////////////////////////////////////8=");
+                    beep.volume = 0.2;
+                    beep.play();
+                } catch (e) {
+                    console.log("Beep sound could not be played", e);
+                }
+            }
+            
+            // Prevent the page from sleeping
+            async function preventSleep() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        let wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('Wake Lock is active');
+                        
+                        // Release on page visibility change
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.visibilityState === 'visible' && wakeLock === null) {
+                                preventSleep(); // Re-request wake lock
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.log(`Wake Lock Error: ${err.message}`);
+                }
+            }
+            
+            // Attempt to prevent sleep
+            preventSleep();
+            
+            // Auto-refresh the page every hour to prevent issues
+            setTimeout(function() {
+                location.reload();
+            }, 60 * 60 * 1000); // 1 hour
+            
+            // Rating functionality
+            const stars = document.querySelectorAll('.star');
+            const ratingMessage = document.getElementById('rating-message');
+            const feedbackReason = document.getElementById('feedback-reason');
+            const reasonSelect = document.getElementById('reason-select');
+            const otherReasonContainer = document.getElementById('other-reason-container');
+            const otherReasonInput = document.getElementById('other-reason');
+            const submitFeedbackBtn = document.getElementById('submit-feedback');
+            let selectedRating = 0;
+            
+            // Add particle effect on star hover
+            function createParticle(x, y, star) {
+                const particle = document.createElement('div');
+                const ratingStars = document.querySelector('.rating-stars');
+                const starColor = window.getComputedStyle(star).color;
+                
+                particle.style.position = 'absolute';
+                particle.style.width = Math.random() * 10 + 3 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = starColor;
+                particle.style.borderRadius = '50%';
+                particle.style.pointerEvents = 'none';
+                
+                // Set initial position at mouse coordinates relative to the star
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                // Set random direction and rotation for the particle
+                particle.style.setProperty('--x', (Math.random() * 100 - 50) + 'px');
+                particle.style.setProperty('--y', (Math.random() * -80 - 20) + 'px');
+                particle.style.setProperty('--r', (Math.random() * 360) + 'deg');
+                
+                // Add animation
+                particle.style.animation = 'particle-move 1s ease-out forwards';
+                
+                // Add to DOM
+                ratingStars.appendChild(particle);
+                
+                // Remove particle after animation completes
+                setTimeout(() => {
+                    if (particle && particle.parentNode === ratingStars) {
+                        ratingStars.removeChild(particle);
+                    }
+                }, 1000);
+            }
+            
+            // Add event listeners to stars
+            stars.forEach(star => {
+                // Add particle effect on mouse move
+                star.addEventListener('mousemove', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Create 1-2 particles per movement for performance
+                    if (Math.random() > 0.8) {
+                        createParticle(x, y, this);
+                    }
+                });
+                
+                star.addEventListener('click', function() {
+                    // Reset inactivity timer when rating
+                    resetInactivityTimer();
+                    
+                    const value = parseInt(this.getAttribute('data-value'));
+                    selectedRating = value;
+                    
+                    // Create more particles on click for visual feedback
+                    for (let i = 0; i < 10; i++) {
+                        const rect = this.getBoundingClientRect();
+                        const x = Math.random() * this.offsetWidth;
+                        const y = Math.random() * this.offsetHeight;
+                        
+                        setTimeout(() => {
+                            createParticle(x, y, this);
+                        }, i * 30);
+                    }
+                    
+                    // Update visual state of stars
+                    stars.forEach(s => {
+                        if (parseInt(s.getAttribute('data-value')) <= value) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                    
+                    // If rating is less than 5, show the reason dropdown
+                    if (value < 5) {
+                        // Show feedback reason section and ensure it stays visible
+                        feedbackReason.style.display = 'block'; 
+                        
+                        // Add a clear message to select a reason
+                        const reasonLabel = document.querySelector('label[for="reason-select"]');
+                        reasonLabel.innerHTML = 'Please select a reason <span style="color: red;">*</span>:';
+                        reasonLabel.style.fontWeight = 'bold';
+                        
+                        // Disable auto-focus on barcode input to prevent dropdown from losing focus
+                        document.removeEventListener('click', focusOnBarcodeInput);
+                        
+                        // Focus on the dropdown to encourage selection
+                        setTimeout(() => {
+                            reasonSelect.focus();
+                        }, 100);
+                    } else {
+                        // For 5-star ratings, submit immediately
+                        submitRating(value);
+                    }
+                });
+            });
+            
+            // Show "Other" text field when "Other" is selected
+            reasonSelect.addEventListener('change', function() {
+                if (this.value === 'Other') {
+                    otherReasonContainer.style.display = 'block';
+                } else {
+                    otherReasonContainer.style.display = 'none';
+                }
+            });
+            
+            // Handle submit feedback button
+            submitFeedbackBtn.addEventListener('click', function() {
+                // Validate that a reason is selected if rating is less than 5
+                if (selectedRating < 5 && !reasonSelect.value) {
+                    // Show a more visible error message
+                    const reasonLabel = document.querySelector('label[for="reason-select"]');
+                    reasonLabel.innerHTML = 'Please select a reason <span style="color: red; font-size: 18px;">*</span>:';
+                    reasonLabel.style.color = 'red';
+                    
+                    // Make the dropdown border red
+                    reasonSelect.style.border = '2px solid red';
+                    
+                    // Shake the dropdown to draw attention
+                    reasonSelect.style.animation = 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both';
+                    setTimeout(() => {
+                        reasonSelect.style.animation = '';
+                    }, 500);
+                    
+                    // Focus on the dropdown
+                    reasonSelect.focus();
+                    return;
+                }
+                
+                // If "Other" is selected, ensure the text field is not empty
+                if (reasonSelect.value === 'Other' && !otherReasonInput.value.trim()) {
+                    // Show a more visible error message
+                    const otherContainer = document.getElementById('other-reason-container');
+                    otherContainer.style.border = '2px solid red';
+                    otherContainer.style.borderRadius = '8px';
+                    otherContainer.style.padding = '10px';
+                    
+                    // Make the textarea border red
+                    otherReasonInput.style.border = '2px solid red';
+                    
+                    // Shake the textarea to draw attention
+                    otherReasonInput.style.animation = 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both';
+                    setTimeout(() => {
+                        otherReasonInput.style.animation = '';
+                    }, 500);
+                    
+                    // Focus on the textarea
+                    otherReasonInput.focus();
+                    return;
+                }
+                
+                // Get the feedback reason
+                let feedbackReasonText = reasonSelect.value;
+                if (feedbackReasonText === 'Other') {
+                    feedbackReasonText = otherReasonInput.value.trim();
+                }
+                
+                // Submit the rating with the reason
+                submitRating(selectedRating, feedbackReasonText);
+                
+                // Re-enable the barcode input focus
+                document.addEventListener('click', focusOnBarcodeInput);
+            });
+            
+            // Function to submit rating to server
+            function submitRating(rating, reason = '') {
+                // Disable all stars and inputs to prevent multiple submissions
+                stars.forEach(star => {
+                    star.style.pointerEvents = 'none';
+                });
+                
+                // If rating is less than 5 and no reason is provided, show the reason dropdown and return
+                if (rating < 5 && !reason) {
+                    // Ensure the feedback reason section is visible
+                    feedbackReason.style.display = 'block';
+                    
+                    // Show a more visible error message
+                    const reasonLabel = document.querySelector('label[for="reason-select"]');
+                    reasonLabel.innerHTML = 'Please select a reason <span style="color: red; font-size: 18px;">*</span>:';
+                    reasonLabel.style.color = 'red';
+                    reasonLabel.style.fontWeight = 'bold';
+                    
+                    // Make the dropdown border red to highlight it
+                    reasonSelect.style.border = '2px solid red';
+                    
+                    // Shake the dropdown to draw attention
+                    reasonSelect.style.animation = 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both';
+                    setTimeout(() => {
+                        reasonSelect.style.animation = '';
+                    }, 500);
+                    
+                    // Focus on the dropdown
+                    setTimeout(() => {
+                        reasonSelect.focus();
+                    }, 100);
+                    
+                    // Restore star clickability since we're not submitting yet
+                    stars.forEach(star => {
+                        star.style.pointerEvents = 'auto';
+                    });
+                    
+                    return; // Don't submit until reason is provided
+                }
+                
+                // Now disable inputs since we're actually submitting
+                reasonSelect.disabled = true;
+                otherReasonInput.disabled = true;
+                submitFeedbackBtn.disabled = true;
+                
+                // Create a new rating document with guest access
+                $.ajax({
+                    url: '/api/resource/Ratings',
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        doctype: 'Ratings',
+                        rate_use: rating,
+                        exact_rating: rating, // Store the same value in exact_rating field
+                        feedback_reason: reason || '',
+                        docstatus: 1 // Submit the document
+                    }),
+                    headers: {
+                        'X-Frappe-CSRF-Token': frappe.csrf_token || ''
+                    },
+                    success: function(response) {
+                        console.log("Rating submitted successfully:", response);
+                        showThankYouMessage();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error submitting rating:", error);
+                        // Try alternative method if the first one fails
+                        submitRatingAlternative(rating, reason);
+                    }
+                });
+            }
+            
+            // Alternative method to submit rating if the first method fails
+            function submitRatingAlternative(rating, reason = '') {
+                $.ajax({
+                    url: '/api/method/price_checker.api.submit_rating',
+                    type: 'POST',
+                    data: {
+                        rating: rating,
+                        reason: reason || ''
+                    },
+                    success: function(response) {
+                        console.log("Rating submitted successfully via alternative method:", response);
+                        showThankYouMessage();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error submitting rating via alternative method:", error);
+                        // Show thank you message anyway to avoid disrupting user experience
+                        showThankYouMessage();
+                    }
+                });
+            }
+            
+            // Show thank you message
+            function showThankYouMessage() {
+                ratingMessage.style.display = 'block';
+                
+                // Hide the stars and reason dropdown
+                document.querySelector('.rating-stars').style.display = 'none';
+                feedbackReason.style.display = 'none';
+                
+                // Update the title
+                document.querySelector('.rating-title').textContent = 'Thank You!';
+                
+                // Only show thank you message briefly, then reset for next rating
+                setTimeout(function() {
+                    // Hide the thank you message
+                    ratingMessage.style.display = 'none';
+                    
+                    // Immediately reset and show rating form again
+                    resetRating();
+                    
+                    // Move the rating container back to its original position
+                    const loaderElement = document.getElementById('loader');
+                    const ratingContainer = document.getElementById('rating-container');
+                    const resultsSection = document.querySelector('.results-section');
+                    
+                    // Insert the rating container back to its original position
+                    document.querySelector('.main-content').insertBefore(ratingContainer, resultsSection);
+                    
+                    // Remove the special styling
+                    ratingContainer.classList.remove('below-item');
+                    
+                    // Show the rating container
+                    ratingContainer.style.display = 'block';
+                }, 1500); // 1.5 seconds
+            }
+            
+            // Reset rating UI
+            function resetRating() {
+                selectedRating = 0;
+                stars.forEach(s => {
+                    s.classList.remove('active');
+                    s.style.pointerEvents = 'auto'; // Re-enable stars
+                });
+                ratingMessage.style.display = 'none';
+                document.querySelector('.rating-stars').style.display = 'flex';
+                document.querySelector('.rating-title').textContent = 'Rate Our Service';
+                
+                // Reset the reason dropdown
+                feedbackReason.style.display = 'none';
+                reasonSelect.value = '';
+                reasonSelect.disabled = false;
+                reasonSelect.style.border = ''; // Reset border color
+                
+                // Reset the reason label
+                const reasonLabel = document.querySelector('label[for="reason-select"]');
+                if (reasonLabel) {
+                    reasonLabel.innerHTML = 'Please tell us why:';
+                    reasonLabel.style.fontWeight = '500';
+                    reasonLabel.style.color = '';
+                }
+                
+                // Reset other reason container
+                otherReasonContainer.style.display = 'none';
+                otherReasonContainer.style.border = '';
+                otherReasonContainer.style.borderRadius = '';
+                otherReasonContainer.style.padding = '';
+                
+                // Reset other reason input
+                otherReasonInput.value = '';
+                otherReasonInput.disabled = false;
+                otherReasonInput.style.border = '';
+                
+                // Reset submit button
+                submitFeedbackBtn.disabled = false;
+                
+                // Re-enable the barcode input focus if it was disabled
+                document.addEventListener('click', focusOnBarcodeInput);
+                
+                // Reset any transition styles
+                const ratingContainer = document.getElementById('rating-container');
+                ratingContainer.style.transition = '';
+                ratingContainer.style.opacity = '';
+            }
+        });
+    </script>
+</body>
+</html> 
